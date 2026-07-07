@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Personal operating system for AI/ML engineering — track habits, DSA progress, projects, and placement prep in one daily cockpit.">
+    <title>AI Engineer OS</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary">
+        <div class="brand">
+          <img src="assets/ai-os-mark.svg" alt="" class="brand-mark">
+          <div>
+            <h1>AI Engineer OS</h1>
+            <p>Daily execution cockpit</p>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-button is-active" data-section="dashboard" type="button">Dashboard</button>
+          <button class="nav-button" data-section="planner" type="button">Planner</button>
+          <button class="nav-button" data-section="habits" type="button">Habits</button>
+          <button class="nav-button" data-section="dsa" type="button">DSA</button>
+          <button class="nav-button" data-section="roadmap" type="button">AI/ML</button>
+          <button class="nav-button" data-section="project" type="button">DETECTOR AI</button>
+          <button class="nav-button" data-section="reviews" type="button">Reviews</button>
+        </nav>
+
+        <div class="sidebar-panel">
+          <span class="eyebrow">Today rule</span>
+          <p>Move one important technical task forward before entertainment.</p>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Operating day</p>
+            <h2 id="pageTitle">Dashboard</h2>
+          </div>
+          <div class="topbar-actions">
+            <div class="sync-panel" aria-live="polite">
+              <span id="syncStatus">Local only</span>
+              <button id="syncButton" class="small-button" type="button">Sign In</button>
+            </div>
+            <input id="activeDate" type="date" aria-label="Active date">
+            <button id="exportData" class="icon-button" type="button" title="Export data" aria-label="Export data">EX</button>
+          </div>
+        </header>
+
+        <section id="dashboard" class="section is-active" aria-labelledby="dashboard-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Command center</p>
+              <h3 id="dashboard-title">Today at a glance</h3>
+            </div>
+            <p class="muted">Keep the system small enough that you actually use it.</p>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="panel hero-panel">
+              <div>
+                <p class="eyebrow">Current identity</p>
+                <h3>AI/ML engineer in training</h3>
+                <p>Build skill, ship DETECTOR AI, lead InnovoCon, and prepare for interviews through daily visible progress.</p>
+              </div>
+              <img src="assets/ai-os-mark.svg" alt="" class="hero-art">
+            </article>
+
+            <article class="panel metric-panel">
+              <span class="metric-value" id="dailyScore">0</span>
+              <span class="metric-label">Daily score</span>
+            </article>
+
+            <article class="panel metric-panel">
+              <span class="metric-value" id="habitCount">0/11</span>
+              <span class="metric-label">Habits complete</span>
+            </article>
+
+            <article class="panel metric-panel">
+              <span class="metric-value" id="dsaCount">0</span>
+              <span class="metric-label">DSA logged</span>
+            </article>
+          </div>
+
+          <div class="two-column">
+            <article class="panel">
+              <div class="panel-title">
+                <h4>Top 3</h4>
+                <button id="clearDoneTasks" class="small-button" type="button">Clear Done</button>
+              </div>
+              <div id="topTasks" class="task-list"></div>
+              <form id="taskForm" class="inline-form">
+                <input id="taskInput" type="text" placeholder="Add a priority task" autocomplete="off">
+                <select id="taskArea" aria-label="Task area">
+                  <option>AI/ML</option>
+                  <option>DSA</option>
+                  <option>DETECTOR AI</option>
+                  <option>Health</option>
+                  <option>Placement</option>
+                </select>
+                <button type="submit">Add</button>
+              </form>
+            </article>
+
+            <article class="panel">
+              <div class="panel-title">
+                <h4>Current focus</h4>
+              </div>
+              <div class="focus-stack">
+                <div>
+                  <span>Morning</span>
+                  <strong>DSA or AI/ML deep work</strong>
+                </div>
+                <div>
+                  <span>Afternoon</span>
+                  <strong>DETECTOR AI project block</strong>
+                </div>
+                <div>
+                  <span>Night</span>
+                  <strong>Reflection and tomorrow priority</strong>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="planner" class="section" aria-labelledby="planner-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Daily execution</p>
+              <h3 id="planner-title">Planner</h3>
+            </div>
+          </div>
+
+          <div class="two-column">
+            <article class="panel">
+              <h4>Time blocks</h4>
+              <div id="timeBlocks" class="timeline"></div>
+            </article>
+            <article class="panel">
+              <h4>Night reflection</h4>
+              <label class="field-label" for="reflectionWin">Win</label>
+              <textarea id="reflectionWin" rows="3" placeholder="What worked today?"></textarea>
+              <label class="field-label" for="reflectionLesson">Lesson</label>
+              <textarea id="reflectionLesson" rows="3" placeholder="What should change tomorrow?"></textarea>
+              <label class="field-label" for="tomorrowPriority">Tomorrow first priority</label>
+              <input id="tomorrowPriority" type="text" placeholder="One task to start with">
+            </article>
+          </div>
+        </section>
+
+        <section id="habits" class="section" aria-labelledby="habits-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Consistency</p>
+              <h3 id="habits-title">Habits</h3>
+            </div>
+          </div>
+          <div id="habitGrid" class="habit-grid"></div>
+        </section>
+
+        <section id="dsa" class="section" aria-labelledby="dsa-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Interview engine</p>
+              <h3 id="dsa-title">DSA Tracker</h3>
+            </div>
+          </div>
+          <article class="panel">
+            <form id="dsaForm" class="dsa-form">
+              <input id="problemName" type="text" placeholder="Problem name" required>
+              <select id="problemTopic">
+                <option>Arrays</option>
+                <option>Hashing</option>
+                <option>Two Pointers</option>
+                <option>Binary Search</option>
+                <option>Trees</option>
+                <option>Graphs</option>
+                <option>Dynamic Programming</option>
+              </select>
+              <select id="problemDifficulty">
+                <option>Easy</option>
+                <option>Medium</option>
+                <option>Hard</option>
+              </select>
+              <input id="problemTime" type="number" min="0" placeholder="Minutes">
+              <button type="submit">Log</button>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Problem</th>
+                    <th>Topic</th>
+                    <th>Difficulty</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dsaTable"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section id="roadmap" class="section" aria-labelledby="roadmap-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">90 days</p>
+              <h3 id="roadmap-title">AI/ML Roadmap</h3>
+            </div>
+          </div>
+          <div id="roadmapList" class="roadmap-list"></div>
+        </section>
+
+        <section id="project" class="section" aria-labelledby="project-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Flagship build</p>
+              <h3 id="project-title">DETECTOR AI Project</h3>
+            </div>
+          </div>
+          <div id="projectBoard" class="board"></div>
+        </section>
+
+        <section id="reviews" class="section" aria-labelledby="reviews-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Feedback loop</p>
+              <h3 id="reviews-title">Reviews</h3>
+            </div>
+          </div>
+          <div class="two-column">
+            <article class="panel">
+              <h4>Weekly review</h4>
+              <textarea id="weeklyReview" rows="10" placeholder="What went well? What failed? What is next week's main goal?"></textarea>
+            </article>
+            <article class="panel">
+              <h4>Monthly review</h4>
+              <textarea id="monthlyReview" rows="10" placeholder="Metrics, biggest win, biggest lesson, next strategy."></textarea>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

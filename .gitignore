@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Firebase
+.firebase/
+.firebaserc
+
+# Environment / secrets
+firebase-config.local.js
+.env
+.env.*
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts
+dist/
+.cache/
+
+# Personal tracking docs (blank worksheets, not project docs)
+0[0-9]_*.md
+10_*.md
+templates/

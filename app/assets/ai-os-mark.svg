@@ -1,0 +1,20 @@
+<svg width="640" height="360" viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">AI Engineer OS visual mark</title>
+  <desc id="desc">A structured abstract dashboard grid with connected nodes.</desc>
+  <rect width="640" height="360" fill="#f5f7f4"/>
+  <path d="M0 72h640M0 144h640M0 216h640M0 288h640M80 0v360M160 0v360M240 0v360M320 0v360M400 0v360M480 0v360M560 0v360" stroke="#d8ded5" stroke-width="1"/>
+  <rect x="72" y="58" width="154" height="82" rx="8" fill="#ffffff" stroke="#24312d" stroke-width="2"/>
+  <rect x="266" y="58" width="116" height="82" rx="8" fill="#e9f4ef" stroke="#2e6f5e" stroke-width="2"/>
+  <rect x="421" y="58" width="147" height="82" rx="8" fill="#fff3df" stroke="#a46325" stroke-width="2"/>
+  <rect x="72" y="196" width="130" height="84" rx="8" fill="#edf2ff" stroke="#344e85" stroke-width="2"/>
+  <rect x="244" y="196" width="154" height="84" rx="8" fill="#fff8f5" stroke="#b85640" stroke-width="2"/>
+  <rect x="440" y="196" width="128" height="84" rx="8" fill="#ffffff" stroke="#24312d" stroke-width="2"/>
+  <path d="M226 99h40M382 99h39M149 140v56M324 140v56M494 140v56M202 238h42M398 238h42" stroke="#24312d" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="149" cy="99" r="12" fill="#2e6f5e"/>
+  <circle cx="324" cy="99" r="12" fill="#344e85"/>
+  <circle cx="494" cy="99" r="12" fill="#a46325"/>
+  <circle cx="137" cy="238" r="12" fill="#344e85"/>
+  <circle cx="321" cy="238" r="12" fill="#b85640"/>
+  <circle cx="504" cy="238" r="12" fill="#2e6f5e"/>
+  <path d="M103 83h76M103 105h93M292 83h64M292 105h48M449 83h82M449 105h56M103 221h62M103 243h77M275 221h91M275 243h70M469 221h62M469 243h75" stroke="#24312d" stroke-width="5" stroke-linecap="round"/>
+</svg>
