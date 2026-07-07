@@ -9,6 +9,17 @@ import {
   isSignedIn
 } from "./firebase-sync.js";
 
+import {
+  defaultSchedule,
+  registerServiceWorker,
+  getPermissionState,
+  requestPermission,
+  startScheduler,
+  testBrowserNotification,
+  testSwNotification,
+  testEmailNotification
+} from "./notifications.js";
+
 const storageKey = "aiEngineerOS.v1";
 
 const defaults = {
@@ -34,7 +45,15 @@ const defaults = {
     { title: "Model training & metrics", status: "Backlog", detail: "Train, log mAP/precision/recall, compare against the MegaDetector baseline." },
     { title: "Demo / inference interface", status: "Backlog", detail: "Simple UI or API to run detection on new camera-trap footage." },
     { title: "Portfolio README", status: "Backlog", detail: "Document setup, architecture, dataset sources, metrics, and limitations." }
-  ]
+  ],
+  notifications: {
+    browserEnabled: false,
+    swEnabled: false,
+    emailEnabled: false,
+    schedule: structuredClone(defaultSchedule),
+    firedToday: {},
+    _firedDate: ""
+  }
 };
 
 const habits = [
@@ -147,6 +166,7 @@ function init() {
   bindText("monthlyReview", "monthly");
 
   hydrateAllViews();
+  initNotifications();
   initSync();
 }
 
@@ -157,6 +177,12 @@ function setSection(id, title) {
   document.querySelector(`[data-section="${id}"]`).classList.add("is-active");
   document.getElementById("pageTitle").textContent = title;
 }
+
+// Expose for service worker click-to-navigate
+window.__navigateSection = (section) => {
+  const btn = document.querySelector(`[data-section="${section}"]`);
+  if (btn) setSection(section, btn.textContent);
+};
 
 function bindText(elementId, key) {
   const element = document.getElementById(elementId);
@@ -364,12 +390,189 @@ function hydrateAllViews() {
   renderRoadmap();
   renderProject();
   updateMetrics();
+  renderNotificationUI();
 }
 
 function setSyncStatus(text) {
   const el = document.getElementById("syncStatus");
   if (el) el.textContent = text;
 }
+
+// -----------------------------------------------------------------------
+// Notification UI
+// -----------------------------------------------------------------------
+
+function updatePermissionBadge() {
+  const badge = document.getElementById("permissionBadge");
+  const btn = document.getElementById("requestPermBtn");
+  if (!badge) return;
+
+  const perm = getPermissionState();
+  badge.classList.remove("badge-granted", "badge-denied", "badge-pending");
+
+  if (perm === "granted") {
+    badge.textContent = "Granted";
+    badge.classList.add("badge-granted");
+    btn.style.display = "none";
+  } else if (perm === "denied") {
+    badge.textContent = "Blocked";
+    badge.classList.add("badge-denied");
+    btn.textContent = "Blocked by browser";
+    btn.disabled = true;
+  } else if (perm === "unsupported") {
+    badge.textContent = "Not supported";
+    badge.classList.add("badge-denied");
+    btn.style.display = "none";
+  } else {
+    badge.textContent = "Not enabled";
+    badge.classList.add("badge-pending");
+  }
+}
+
+function renderScheduleTable() {
+  const tbody = document.getElementById("scheduleTable");
+  if (!tbody) return;
+
+  const schedule = state.notifications.schedule || [];
+  tbody.innerHTML = "";
+
+  schedule.forEach((item, index) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><input type="time" class="schedule-time-input" value="${item.time}" data-idx="${index}" data-field="time"></td>
+      <td><input type="text" class="schedule-text-input" value="${escapeHtml(item.title)}" data-idx="${index}" data-field="title"></td>
+      <td><input type="text" class="schedule-text-input" value="${escapeHtml(item.message)}" data-idx="${index}" data-field="message"></td>
+      <td><input type="checkbox" ${item.emailDigest ? "checked" : ""} data-idx="${index}" data-field="emailDigest" aria-label="Send email digest"></td>
+      <td><input type="checkbox" ${item.enabled ? "checked" : ""} data-idx="${index}" data-field="enabled" aria-label="Active"></td>
+      <td><button class="remove-btn" data-idx="${index}" type="button">\u00d7</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Bind change events
+  tbody.querySelectorAll("input").forEach((input) => {
+    input.addEventListener("change", () => {
+      const idx = Number(input.dataset.idx);
+      const field = input.dataset.field;
+      if (field === "enabled" || field === "emailDigest") {
+        state.notifications.schedule[idx][field] = input.checked;
+      } else {
+        state.notifications.schedule[idx][field] = input.value;
+      }
+      saveState();
+    });
+  });
+
+  // Bind remove buttons
+  tbody.querySelectorAll(".remove-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.notifications.schedule.splice(Number(btn.dataset.idx), 1);
+      saveState();
+      renderScheduleTable();
+    });
+  });
+}
+
+function renderNotificationUI() {
+  updatePermissionBadge();
+
+  const notif = state.notifications;
+  const toggleBrowser = document.getElementById("toggleBrowser");
+  const toggleSw = document.getElementById("toggleSw");
+  const toggleEmail = document.getElementById("toggleEmail");
+  const emailPanel = document.getElementById("emailConfigPanel");
+
+  if (toggleBrowser) toggleBrowser.checked = notif.browserEnabled;
+  if (toggleSw) toggleSw.checked = notif.swEnabled;
+  if (toggleEmail) toggleEmail.checked = notif.emailEnabled;
+  if (emailPanel) emailPanel.style.display = notif.emailEnabled ? "block" : "none";
+
+  renderScheduleTable();
+}
+
+function showTestResult(message) {
+  const el = document.getElementById("testResult");
+  if (el) {
+    el.textContent = message;
+    setTimeout(() => { el.textContent = ""; }, 5000);
+  }
+}
+
+async function initNotifications() {
+  // Ensure notification state exists (for users with existing localStorage)
+  if (!state.notifications) {
+    state.notifications = structuredClone(defaults.notifications);
+    saveState();
+  }
+
+  // Register service worker
+  await registerServiceWorker();
+
+  // Permission button
+  document.getElementById("requestPermBtn")?.addEventListener("click", async () => {
+    const result = await requestPermission();
+    updatePermissionBadge();
+    if (result === "granted") {
+      showTestResult("Notifications enabled!");
+    }
+  });
+
+  // Channel toggles
+  document.getElementById("toggleBrowser")?.addEventListener("change", (e) => {
+    state.notifications.browserEnabled = e.target.checked;
+    saveState();
+  });
+
+  document.getElementById("toggleSw")?.addEventListener("change", (e) => {
+    state.notifications.swEnabled = e.target.checked;
+    saveState();
+  });
+
+  document.getElementById("toggleEmail")?.addEventListener("change", (e) => {
+    state.notifications.emailEnabled = e.target.checked;
+    document.getElementById("emailConfigPanel").style.display = e.target.checked ? "block" : "none";
+    saveState();
+  });
+
+  // Test buttons
+  document.getElementById("testBrowser")?.addEventListener("click", () => {
+    const result = testBrowserNotification();
+    showTestResult(result.ok ? "Browser notification sent!" : `Failed: ${result.reason}`);
+  });
+
+  document.getElementById("testSw")?.addEventListener("click", () => {
+    const result = testSwNotification();
+    showTestResult(result.ok ? "Push notification sent \u2014 check another tab!" : `Failed: ${result.reason}`);
+  });
+
+  document.getElementById("testEmail")?.addEventListener("click", async () => {
+    showTestResult("Sending test email...");
+    const result = await testEmailNotification(state);
+    showTestResult(result.ok ? "Email sent \u2014 check your inbox!" : `Failed: ${result.reason}`);
+  });
+
+  // Add reminder button
+  document.getElementById("addReminder")?.addEventListener("click", () => {
+    state.notifications.schedule.push({
+      time: "08:00",
+      title: "New Reminder",
+      message: "Your custom reminder message.",
+      enabled: true,
+      emailDigest: false
+    });
+    saveState();
+    renderScheduleTable();
+  });
+
+  renderNotificationUI();
+
+  // Start the notification scheduler
+  startScheduler(() => state, saveState);
+}
+
+// -----------------------------------------------------------------------
+// Cloud Sync
+// -----------------------------------------------------------------------
 
 function initSync() {
   const syncButton = document.getElementById("syncButton");

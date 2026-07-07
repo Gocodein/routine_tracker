@@ -26,6 +26,7 @@
           <button class="nav-button" data-section="roadmap" type="button">AI/ML</button>
           <button class="nav-button" data-section="project" type="button">DETECTOR AI</button>
           <button class="nav-button" data-section="reviews" type="button">Reviews</button>
+          <button class="nav-button" data-section="notifications" type="button">Notifications</button>
         </nav>
 
         <div class="sidebar-panel">
@@ -243,6 +244,98 @@
               <textarea id="monthlyReview" rows="10" placeholder="Metrics, biggest win, biggest lesson, next strategy."></textarea>
             </article>
           </div>
+        </section>
+
+        <section id="notifications" class="section" aria-labelledby="notifications-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Reminders</p>
+              <h3 id="notifications-title">Notifications</h3>
+            </div>
+            <div class="notif-status" aria-live="polite">
+              <span id="permissionBadge" class="status-badge badge-pending">Checking…</span>
+            </div>
+          </div>
+
+          <div class="two-column">
+            <article class="panel">
+              <div class="panel-title">
+                <h4>Channels</h4>
+                <button id="requestPermBtn" class="small-button" type="button">Enable Notifications</button>
+              </div>
+
+              <div class="channel-list">
+                <label class="channel-row">
+                  <span>
+                    <strong>Browser Notifications</strong>
+                    <p class="muted">Shows alerts when the tab is open</p>
+                  </span>
+                  <input id="toggleBrowser" type="checkbox" class="toggle-input">
+                  <span class="toggle-track"></span>
+                </label>
+
+                <label class="channel-row">
+                  <span>
+                    <strong>Background Push</strong>
+                    <p class="muted">Works even when the tab is in the background</p>
+                  </span>
+                  <input id="toggleSw" type="checkbox" class="toggle-input">
+                  <span class="toggle-track"></span>
+                </label>
+
+                <label class="channel-row">
+                  <span>
+                    <strong>Email Digest</strong>
+                    <p class="muted">Daily summary sent to your inbox at reflection time</p>
+                  </span>
+                  <input id="toggleEmail" type="checkbox" class="toggle-input">
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="test-buttons">
+                <button id="testBrowser" class="small-button" type="button">Test Browser</button>
+                <button id="testSw" class="small-button" type="button">Test Push</button>
+                <button id="testEmail" class="small-button" type="button">Test Email</button>
+              </div>
+              <p id="testResult" class="muted" aria-live="polite"></p>
+            </article>
+
+            <article class="panel" id="emailConfigPanel" style="display:none">
+              <h4>Email Setup (EmailJS)</h4>
+              <p class="muted" style="margin-bottom:12px">Sign up free at <a href="https://www.emailjs.com" target="_blank" rel="noopener">emailjs.com</a> and paste your keys below.</p>
+              <label class="field-label" for="ejsPublicKey">Public Key</label>
+              <input id="ejsPublicKey" type="text" placeholder="PASTE_PUBLIC_KEY">
+              <label class="field-label" for="ejsServiceId">Service ID</label>
+              <input id="ejsServiceId" type="text" placeholder="PASTE_SERVICE_ID">
+              <label class="field-label" for="ejsTemplateId">Template ID</label>
+              <input id="ejsTemplateId" type="text" placeholder="PASTE_TEMPLATE_ID">
+              <label class="field-label" for="ejsEmail">Recipient Email</label>
+              <input id="ejsEmail" type="email" placeholder="your@email.com">
+            </article>
+          </div>
+
+          <article class="panel" style="margin-top:14px">
+            <div class="panel-title">
+              <h4>Reminder Schedule</h4>
+              <button id="addReminder" class="small-button" type="button">+ Add</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Title</th>
+                    <th>Message</th>
+                    <th>Email</th>
+                    <th>Active</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="scheduleTable"></tbody>
+              </table>
+            </div>
+          </article>
         </section>
       </main>
     </div>
