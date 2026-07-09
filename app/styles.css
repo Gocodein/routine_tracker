@@ -646,3 +646,220 @@ th {
   background: #fde0db;
 }
 
+/* -----------------------------------------------------------------------
+   Toast notification system
+   ----------------------------------------------------------------------- */
+
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--teal);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(36, 49, 45, 0.15);
+  padding: 12px 14px;
+  animation: toast-in 0.35s ease-out;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.toast-high {
+  border-left-color: var(--coral);
+  background: #fff9f8;
+}
+
+.toast-catchup {
+  border-left-color: var(--amber);
+}
+
+.toast-exit {
+  opacity: 0;
+  transform: translateX(60px);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.toast-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.toast-header strong {
+  flex: 1;
+  font-size: 13px;
+}
+
+.toast-icon {
+  font-size: 16px;
+}
+
+.toast-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #fef3cd;
+  color: var(--amber);
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.toast-close:hover {
+  color: var(--ink);
+}
+
+.toast-body {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* -----------------------------------------------------------------------
+   Next Up widget (dashboard)
+   ----------------------------------------------------------------------- */
+
+.next-up-panel {
+  background: linear-gradient(135deg, #e9f4ef 0%, #ddf0f7 100%);
+  border: 1px solid #c5e4d8;
+}
+
+.next-up-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.next-up-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.next-up-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.next-up-content h4 {
+  margin: 2px 0 0;
+  font-size: 15px;
+}
+
+.next-up-countdown {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--teal);
+  background: rgba(46, 111, 94, 0.12);
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 6px;
+}
+
+.next-up-time {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--teal);
+  white-space: nowrap;
+}
+
+/* -----------------------------------------------------------------------
+   Notification history
+   ----------------------------------------------------------------------- */
+
+.notif-history {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notif-history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.notif-history-item:last-child {
+  border-bottom: none;
+}
+
+.notif-history-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--teal);
+  white-space: nowrap;
+  min-width: 42px;
+}
+
+.notif-history-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-history-body strong {
+  font-size: 13px;
+  display: block;
+}
+
+.notif-history-body p {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 2px 0 0;
+}
+
+.notif-history-badge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.badge-fired {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-catchup {
+  background: #fef3cd;
+  color: #856404;
+}
+
+.badge-missed {
+  background: #fde0db;
+  color: var(--coral);
+}

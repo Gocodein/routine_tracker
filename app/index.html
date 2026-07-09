@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
+    <!-- Toast notification container -->
+    <div id="notifToast" class="toast-container" aria-live="polite"></div>
     <div class="app-shell">
       <aside class="sidebar" aria-label="Primary">
         <div class="brand">
@@ -85,6 +87,19 @@
               <span class="metric-label">DSA logged</span>
             </article>
           </div>
+
+          <!-- Next Up widget -->
+          <article id="nextUpWidget" class="panel next-up-panel" style="display:none">
+            <div class="next-up-row">
+              <div class="next-up-icon">⏰</div>
+              <div class="next-up-content">
+                <p class="eyebrow">Next reminder <span id="nextUpCountdown" class="next-up-countdown"></span></p>
+                <h4 id="nextUpTitle"></h4>
+                <p class="muted" id="nextUpMessage"></p>
+              </div>
+              <span class="next-up-time" id="nextUpTime"></span>
+            </div>
+          </article>
 
           <div class="two-column">
             <article class="panel">
@@ -293,6 +308,15 @@
                 </label>
               </div>
 
+              <label class="channel-row">
+                <span>
+                  <strong>Sound Alerts</strong>
+                  <p class="muted">Play a tone when reminders fire</p>
+                </span>
+                <input id="toggleSound" type="checkbox" class="toggle-input" checked>
+                <span class="toggle-track"></span>
+              </label>
+
               <div class="test-buttons">
                 <button id="testBrowser" class="small-button" type="button">Test Browser</button>
                 <button id="testSw" class="small-button" type="button">Test Push</button>
@@ -334,6 +358,15 @@
                 </thead>
                 <tbody id="scheduleTable"></tbody>
               </table>
+            </div>
+          </article>
+
+          <article class="panel" style="margin-top:14px">
+            <div class="panel-title">
+              <h4>Notification History</h4>
+            </div>
+            <div id="notifHistory" class="notif-history">
+              <p class="muted">No notifications yet today.</p>
             </div>
           </article>
         </section>

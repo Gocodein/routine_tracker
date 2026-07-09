@@ -17,7 +17,9 @@ import {
   startScheduler,
   testBrowserNotification,
   testSwNotification,
-  testEmailNotification
+  testEmailNotification,
+  onNotification,
+  getNotificationLog
 } from "./notifications.js";
 
 const storageKey = "aiEngineerOS.v1";
@@ -50,9 +52,12 @@ const defaults = {
     browserEnabled: false,
     swEnabled: false,
     emailEnabled: false,
+    soundEnabled: true,
     schedule: structuredClone(defaultSchedule),
     firedToday: {},
-    _firedDate: ""
+    _firedDate: "",
+    _emailSentToday: false,
+    log: []
   }
 };
 
@@ -480,14 +485,43 @@ function renderNotificationUI() {
   const toggleBrowser = document.getElementById("toggleBrowser");
   const toggleSw = document.getElementById("toggleSw");
   const toggleEmail = document.getElementById("toggleEmail");
+  const toggleSound = document.getElementById("toggleSound");
   const emailPanel = document.getElementById("emailConfigPanel");
 
   if (toggleBrowser) toggleBrowser.checked = notif.browserEnabled;
   if (toggleSw) toggleSw.checked = notif.swEnabled;
   if (toggleEmail) toggleEmail.checked = notif.emailEnabled;
+  if (toggleSound) toggleSound.checked = notif.soundEnabled !== false;
   if (emailPanel) emailPanel.style.display = notif.emailEnabled ? "block" : "none";
 
   renderScheduleTable();
+  renderNotifHistory();
+}
+
+function renderNotifHistory() {
+  const container = document.getElementById("notifHistory");
+  if (!container) return;
+
+  const log = getNotificationLog(state);
+  if (log.length === 0) {
+    container.innerHTML = '<p class="muted">No notifications yet today.</p>';
+    return;
+  }
+
+  container.innerHTML = log.slice(0, 20).map((entry) => {
+    const badgeClass = entry.type === "fired" ? "badge-fired" : entry.type === "catchup" ? "badge-catchup" : "badge-missed";
+    const badgeText = entry.type === "fired" ? "Sent" : entry.type === "catchup" ? "Catch-up" : "Missed";
+    return `
+      <div class="notif-history-item">
+        <span class="notif-history-time">${escapeHtml(entry.time)}</span>
+        <div class="notif-history-body">
+          <strong>${escapeHtml(entry.title)}</strong>
+          <p>${escapeHtml(entry.message)}</p>
+        </div>
+        <span class="notif-history-badge ${badgeClass}">${badgeText}</span>
+      </div>
+    `;
+  }).join("");
 }
 
 function showTestResult(message) {
@@ -534,6 +568,11 @@ async function initNotifications() {
     saveState();
   });
 
+  document.getElementById("toggleSound")?.addEventListener("change", (e) => {
+    state.notifications.soundEnabled = e.target.checked;
+    saveState();
+  });
+
   // Test buttons
   document.getElementById("testBrowser")?.addEventListener("click", () => {
     const result = testBrowserNotification();
@@ -565,6 +604,11 @@ async function initNotifications() {
   });
 
   renderNotificationUI();
+
+  // Listen for notification events to update the history UI
+  onNotification(() => {
+    renderNotifHistory();
+  });
 
   // Start the notification scheduler
   startScheduler(() => state, saveState);
