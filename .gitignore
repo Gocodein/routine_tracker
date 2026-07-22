@@ -1,36 +1,41 @@
-# Dependencies
-node_modules/
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Firebase
-.firebase/
-.firebaserc
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Environment / secrets
-firebase-config.local.js
-.env
-.env.*
+# testing
+/coverage
 
-# OS files
-Thumbs.db
-Desktop.ini
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
 .DS_Store
+*.pem
 
-# Editor / IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Logs
-*.log
+# debug
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# Build artifacts
-dist/
-.cache/
+# env files (can opt-in for committing if needed)
+.env*
 
-# Personal tracking docs (blank worksheets, not project docs)
-0[0-9]_*.md
-10_*.md
-templates/
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
