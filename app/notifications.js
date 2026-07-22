@@ -78,9 +78,24 @@ export async function registerServiceWorker() {
     swRegistration = await navigator.serviceWorker.register("sw.js", { scope: "/" });
     await navigator.serviceWorker.ready;
 
+    // Notify the user when a new version of the app is installed
+    swRegistration.addEventListener("updatefound", () => {
+      const newWorker = swRegistration.installing;
+      if (!newWorker) return;
+      newWorker.addEventListener("statechange", () => {
+        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+          showToast("Update ready", "A new version is available. Refresh to update.", "normal", false);
+        }
+      });
+    });
+
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data?.type === "NAVIGATE_SECTION" && typeof window.__navigateSection === "function") {
         window.__navigateSection(event.data.section);
+      }
+      if (event.data?.type === "REMINDERS_FIRED_IN_SW") {
+        // SW fired reminders while we were away — merge so we don't double-fire
+        mergeSwFiredIntoState().catch(() => {});
       }
     });
 
@@ -89,6 +104,109 @@ export async function registerServiceWorker() {
     console.warn("SW registration failed:", err);
     return null;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Offline reminder support — mirror schedule to the service worker (IndexedDB)
+// and register background sync so reminders fire with the tab closed.
+// ---------------------------------------------------------------------------
+
+const IDB_NAME = "ai-os-db";
+const IDB_STORE = "kv";
+
+function idbGetKey(key) {
+  return new Promise((resolve) => {
+    if (!("indexedDB" in window)) return resolve(undefined);
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => {
+      if (!req.result.objectStoreNames.contains(IDB_STORE)) {
+        req.result.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = () => {
+      try {
+        const db = req.result;
+        const get = db.transaction(IDB_STORE, "readonly").objectStore(IDB_STORE).get(key);
+        get.onsuccess = () => { db.close(); resolve(get.result); };
+        get.onerror = () => { db.close(); resolve(undefined); };
+      } catch { resolve(undefined); }
+    };
+    req.onerror = () => resolve(undefined);
+  });
+}
+
+async function mergeSwFiredIntoState() {
+  if (!getAppState || !saveStateFn) return;
+  const fired = await idbGetKey("firedToday");
+  if (!fired || fired._date !== todayKey()) return;
+
+  const state = getAppState();
+  const notif = state.notifications;
+  if (!notif) return;
+
+  let changed = false;
+  Object.keys(fired).forEach((key) => {
+    if (key === "_date") return;
+    if (!notif.firedToday[key]) {
+      notif.firedToday[key] = true;
+      changed = true;
+    }
+  });
+  if (changed) saveStateFn();
+}
+
+export function syncScheduleToSW(state) {
+  const controller = navigator.serviceWorker?.controller || swRegistration?.active;
+  if (!controller) return;
+
+  const notif = state?.notifications;
+  if (!notif) return;
+
+  const fired = { _date: todayKey() };
+  Object.keys(notif.firedToday || {}).forEach((key) => {
+    if (key.startsWith(todayKey())) fired[key] = true;
+  });
+
+  controller.postMessage({
+    type: "SYNC_SCHEDULE",
+    swEnabled: !!notif.swEnabled,
+    schedule: (notif.schedule || []).map((item) => ({
+      time: item.time,
+      title: item.title,
+      message: item.message,
+      enabled: !!item.enabled,
+      priority: item.priority || "normal"
+    })),
+    firedToday: fired
+  });
+}
+
+export async function enableBackgroundCheckins() {
+  if (!swRegistration) return { periodic: false, sync: false };
+  const result = { periodic: false, sync: false };
+
+  // Periodic Background Sync — lets the SW wake up regularly, even offline
+  if ("periodicSync" in swRegistration) {
+    try {
+      const status = await navigator.permissions.query({ name: "periodic-background-sync" });
+      if (status.state === "granted") {
+        await swRegistration.periodicSync.register("ai-os-checkin", {
+          minInterval: 15 * 60 * 1000
+        });
+        result.periodic = true;
+      }
+    } catch { /* not supported or denied */ }
+  }
+
+  // One-off Background Sync — fires a reminder check when connectivity returns
+  if ("sync" in swRegistration) {
+    try {
+      await swRegistration.sync.register("ai-os-reminder-sync");
+      result.sync = true;
+    } catch { /* not supported */ }
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -468,6 +586,9 @@ function processSchedule(isCatchUp) {
     saveStateFn();
   }
 
+  // Keep the service worker's offline schedule mirror up to date
+  syncScheduleToSW(state);
+
   // Update "next up" widget
   updateNextUp(state);
 
@@ -580,8 +701,10 @@ export function startScheduler(stateGetter, saveState) {
   // Listen for tab focus changes
   document.addEventListener("visibilitychange", handleVisibilityChange);
 
-  // Initial run — catch up on anything missed since last visit
-  processSchedule(true);
+  // Merge anything the SW fired while the tab was closed, then catch up
+  mergeSwFiredIntoState()
+    .catch(() => {})
+    .finally(() => processSchedule(true));
 }
 
 export function stopScheduler() {

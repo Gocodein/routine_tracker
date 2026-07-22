@@ -797,6 +797,32 @@ th {
   background: #fff4cc;
 }
 
+.offline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 750;
+  color: #7a5a00;
+  background: #fff4cc;
+  border: 1px solid #f0e2ad;
+  white-space: nowrap;
+}
+
+.offline-badge[hidden] {
+  display: none;
+}
+
+.offline-badge::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a46325;
+}
+
 .channel-list {
   display: grid;
   gap: 8px;

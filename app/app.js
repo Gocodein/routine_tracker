@@ -15,6 +15,8 @@ import {
   getPermissionState,
   requestPermission,
   startScheduler,
+  syncScheduleToSW,
+  enableBackgroundCheckins,
   testBrowserNotification,
   testSwNotification,
   testEmailNotification,
@@ -126,6 +128,8 @@ function saveState() {
   localStorage.setItem(storageKey, JSON.stringify(state));
   updateMetrics();
   queueCloudPush();
+  // Mirror the reminder schedule to the service worker for offline notifications
+  syncScheduleToSW(state);
 }
 
 function queueCloudPush() {
@@ -143,10 +147,31 @@ function todayIso() {
   return local.toISOString().slice(0, 10);
 }
 
+function initOfflineIndicator() {
+  const badge = document.getElementById("offlineBadge");
+
+  const update = () => {
+    const offline = !navigator.onLine;
+    if (badge) badge.hidden = !offline;
+    if (!offline) {
+      // Connectivity returned — re-register a one-off sync so the SW
+      // catches up on anything due, and re-mirror the schedule
+      syncScheduleToSW(state);
+      enableBackgroundCheckins().catch(() => {});
+    }
+  };
+
+  window.addEventListener("online", update);
+  window.addEventListener("offline", update);
+  update();
+}
+
 function init() {
   if (!state.activeDate) {
     state.activeDate = todayIso();
   }
+
+  initOfflineIndicator();
 
   document.querySelectorAll(".nav-button").forEach((button) => {
     button.addEventListener("click", () => setSection(button.dataset.section, button.textContent));
@@ -542,12 +567,19 @@ async function initNotifications() {
   // Register service worker
   await registerServiceWorker();
 
+  // Mirror the schedule to the SW and enable background check-ins so
+  // reminders fire even when the tab is closed or the device is offline
+  syncScheduleToSW(state);
+  enableBackgroundCheckins().catch(() => {});
+
   // Permission button
   document.getElementById("requestPermBtn")?.addEventListener("click", async () => {
     const result = await requestPermission();
     updatePermissionBadge();
     if (result === "granted") {
       showTestResult("Notifications enabled!");
+      syncScheduleToSW(state);
+      enableBackgroundCheckins().catch(() => {});
     }
   });
 
