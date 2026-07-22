@@ -1,0 +1,48 @@
+{
+  "name": "AI Engineer OS",
+  "short_name": "AI OS",
+  "description": "Personal operating system for AI/ML engineering — track habits, DSA progress, projects, and placement prep in one daily cockpit.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fbfcfa",
+  "theme_color": "#2e6f5e",
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/?section=dashboard",
+      "description": "Today at a glance"
+    },
+    {
+      "name": "Habits",
+      "url": "/?section=habits",
+      "description": "Check off today's habits"
+    },
+    {
+      "name": "Notifications",
+      "url": "/?section=notifications",
+      "description": "Manage reminders"
+    }
+  ]
+}
